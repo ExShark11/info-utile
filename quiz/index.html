@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Es-tu exploite au travail ? Le test en 2 min</title>
+  <meta name="description" content="8 questions pour savoir si ton employeur te traite correctement. Resultat personnalise et guide de tes droits.">
+  <meta property="og:title" content="Es-tu exploite au travail ? Fais le test">
+  <meta property="og:description" content="8 questions, 2 minutes. Decouvre ton score d'exploitation et ce que tu peux faire.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .quiz-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 100px 24px 60px;
+      min-height: 100vh;
+    }
+
+    /* --- Progress --- */
+    .quiz-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 40px;
+    }
+    .quiz-progress__bar {
+      flex: 1;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      transition: background 0.4s;
+    }
+    .quiz-progress__bar.done { background: var(--red); }
+    .quiz-progress__bar.active { background: var(--accent-mid); }
+
+    /* --- Question card --- */
+    .quiz-card {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      display: none;
+    }
+    .quiz-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      display: block;
+    }
+    .quiz-card__number {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-light);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .quiz-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1.25;
+      margin-bottom: 24px;
+    }
+    .quiz-card__sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* --- Options --- */
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .quiz-opt {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 20px;
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      text-align: left;
+    }
+    .quiz-opt:hover {
+      border-color: var(--accent-mid);
+      background: var(--highlight-bg);
+    }
+    .quiz-opt.selected {
+      border-color: var(--red);
+      background: #FDF2F2;
+    }
+    .quiz-opt__dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.25s;
+    }
+    .quiz-opt.selected .quiz-opt__dot {
+      border-color: var(--red);
+      background: var(--red);
+    }
+    .quiz-opt.selected .quiz-opt__dot::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    /* --- Result --- */
+    .quiz-result {
+      display: none;
+      text-align: center;
+    }
+    .quiz-result.visible { display: block; }
+
+    .result-score {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 6px solid;
+    }
+    .result-score__number {
+      font-family: 'Inter', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .result-score__label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .score-low { border-color: #2E7D32; }
+    .score-low .result-score__number { color: #2E7D32; }
+    .score-mid { border-color: #E65100; }
+    .score-mid .result-score__number { color: #E65100; }
+    .score-high { border-color: var(--red); }
+    .score-high .result-score__number { color: var(--red); }
+
+    .result-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .result-text {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* --- Breakdown --- */
+    .result-breakdown {
+      text-align: left;
+      background: var(--highlight-bg);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin-bottom: 32px;
+    }
+    .result-breakdown h3 {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+    }
+    .breakdown-item:last-child { border-bottom: none; }
+    .breakdown-item__icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .breakdown-item__icon.bad { background: #FFEBEE; }
+    .breakdown-item__icon.ok { background: #E8F5E9; }
+    .breakdown-item__text { flex: 1; color: var(--text); }
+
+    /* --- Share card --- */
+    .share-card {
+      background: linear-gradient(135deg, #1a1a2e, #16213E);
+      color: white;
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin: 32px 0;
+      text-align: center;
+    }
+    .share-card__score {
+      font-family: 'Inter', sans-serif;
+      font-size: 4rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .share-card__title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .share-card__sub {
+      font-size: 14px;
+      opacity: 0.7;
+      margin-bottom: 20px;
+    }
+    .share-card__url {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+
+    /* --- Email gate --- */
+    .email-gate {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin: 32px 0;
+    }
+    .email-gate h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .email-gate p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .email-gate__form {
+      display: flex;
+      gap: 10px;
+    }
+    .email-gate__input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-gate__input:focus { border-color: var(--accent-mid); }
+    .email-gate__btn {
+      padding: 14px 24px;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .email-gate__btn:hover {
+      background: var(--red-dark);
+      transform: translateY(-1px);
+    }
+    .email-gate__success {
+      display: none;
+      padding: 16px;
+      background: #E8F5E9;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #2E7D32;
+      font-weight: 500;
+    }
+
+    /* --- Transition block --- */
+    .transition-block {
+      background: var(--bg-warm);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin: 32px 0;
+      text-align: left;
+    }
+    .transition-block h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .transition-block p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .transition-block a {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--red);
+      text-decoration: none;
+    }
+
+    /* --- Buttons --- */
+    .quiz-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .quiz-btn--primary {
+      background: var(--accent);
+      color: white;
+    }
+    .quiz-btn--primary:hover {
+      background: var(--accent-mid);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .quiz-btn--share {
+      background: var(--white);
+      color: var(--accent);
+      border: 2px solid var(--border);
+    }
+    .quiz-btn--share:hover {
+      border-color: var(--accent-mid);
+    }
+    .result-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 600px) {
+      .email-gate__form { flex-direction: column; }
+      .result-actions { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="../index.html" class="site-header__logo">
+      <span class="npar-badge"><span class="npar-badge__npa">INFO</span><span class="npar-badge__r">UTILE</span></span>
+    </a>
+    <nav>
+      <ul class="site-header__nav">
+        <li><a href="../finance/">Finance</a></li>
+        <li><a href="../travail/">Travail</a></li>
+        <li><a href="../logement/">Logement</a></li>
+        <li><a href="../rejoindre/">Agir</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="quiz-wrap">
+
+  <!-- Progress bar -->
+  <div class="quiz-progress" id="quizProgress"></div>
+
+  <!-- Questions container -->
+  <div id="quizCards"></div>
+
+  <!-- Result -->
+  <div class="quiz-result" id="quizResult">
+    <div class="result-score" id="resultCircle">
+      <div class="result-score__number" id="resultNumber"></div>
+      <div class="result-score__label">/ 100</div>
+    </div>
+    <h1 class="result-title" id="resultTitle"></h1>
+    <p class="result-text" id="resultText"></p>
+
+    <div class="result-breakdown" id="resultBreakdown">
+      <h3>Ton diagnostic</h3>
+      <div id="breakdownList"></div>
+    </div>
+
+    <!-- Share card -->
+    <div class="share-card" id="shareCard">
+      <div class="share-card__score" id="shareScore"></div>
+      <div class="share-card__title">Score d'exploitation au travail</div>
+      <div class="share-card__sub" id="shareLabel"></div>
+      <div class="share-card__url">infoutile.fr/quiz</div>
+    </div>
+
+    <div class="result-actions">
+      <button class="quiz-btn quiz-btn--share" onclick="shareResult()">Partager mon score</button>
+      <button class="quiz-btn quiz-btn--primary" onclick="restartQuiz()">Refaire le test</button>
+    </div>
+
+    <!-- Email gate (partial) -->
+    <div class="email-gate" id="emailGate">
+      <h3>Recois ton guide personnalise</h3>
+      <p>En fonction de ton score, on t'envoie le guide de tes droits adapte a ta situation. Gratuit, sans spam.</p>
+      <div class="email-gate__form" id="emailForm">
+        <input type="email" class="email-gate__input" id="emailInput" placeholder="ton@email.fr" autocomplete="email">
+        <button class="email-gate__btn" onclick="submitEmail()">Recevoir</button>
+      </div>
+      <div class="email-gate__success" id="emailSuccess">
+        C'est envoye ! Verifie ta boite mail (et tes spams, on sait jamais).
+      </div>
+    </div>
+
+    <!-- Transition politique (subtile) -->
+    <div class="transition-block">
+      <h3>Pourquoi c'est comme ca ?</h3>
+      <p>Ce que tu vis au travail n'est pas un accident. C'est un systeme concu pour extraire un maximum de valeur de ton travail en te payant le minimum. Les chiffres sont clairs : les dividendes explosent pendant que les salaires stagnent.</p>
+      <p>La bonne nouvelle : ca peut changer. Pas en demandant gentiment — en s'organisant.</p>
+      <a href="../rejoindre/">Comprendre et agir &rarr;</a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p>Info Utile — Contenu independant. Donnees sourcees. <a href="../rejoindre/">Nous rejoindre</a>.</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  var QUESTIONS = [
+    {
+      id: 'salaire',
+      question: 'Combien gagnes-tu net par mois ?',
+      sub: 'Ton salaire apres impots, primes comprises.',
+      options: [
+        { text: 'Moins de 1 400 euros (SMIC ou moins)', score: 25, tag: 'smic' },
+        { text: 'Entre 1 400 et 1 800 euros', score: 20, tag: 'bas' },
+        { text: 'Entre 1 800 et 2 500 euros', score: 12, tag: 'median' },
+        { text: 'Plus de 2 500 euros', score: 5, tag: 'ok' }
+      ],
+      insight_bad: 'Ton salaire est en dessous du salaire median francais (2 091 euros). Pourtant, tu produis bien plus de valeur que ce que tu recois.',
+      insight_ok: 'Ton salaire est au-dessus de la mediane, mais regarde l\'ecart avec les revenus du capital : les dividendes du CAC 40 ont augmente de 54% en 7 ans.'
+    },
+    {
+      id: 'heures',
+      question: 'Combien d\'heures travailles-tu reellement par semaine ?',
+      sub: 'En comptant les heures supplementaires, le travail a la maison, les messages le soir...',
+      options: [
+        { text: '35h ou moins', score: 2, tag: 'legal' },
+        { text: 'Entre 35h et 40h', score: 8, tag: 'normal' },
+        { text: 'Entre 40h et 50h', score: 18, tag: 'exces' },
+        { text: 'Plus de 50h', score: 25, tag: 'danger' }
+      ],
+      insight_bad: 'Tu travailles bien au-dela du legal. Chaque heure non payee est du travail gratuit pour ton employeur.',
+      insight_ok: 'Tes horaires semblent dans les clous. C\'est deja ca.'
+    },
+    {
+      id: 'heures_sup',
+      question: 'Tes heures supplementaires sont-elles payees ?',
+      sub: '',
+      options: [
+        { text: 'Oui, toutes majorees', score: 0, tag: 'ok' },
+        { text: 'Oui, mais pas majorees', score: 10, tag: 'partiel' },
+        { text: 'Non, jamais payees', score: 20, tag: 'vol' },
+        { text: 'Je n\'en fais pas', score: 0, tag: 'na' }
+      ],
+      insight_bad: 'Ne pas payer les heures sup est illegal. C\'est du vol de salaire pur et simple.',
+      insight_ok: 'Tes heures sup sont payees. C\'est ton droit — pas une faveur.'
+    },
+    {
+      id: 'pression',
+      question: 'Comment decrirais-tu la pression au travail ?',
+      sub: '',
+      options: [
+        { text: 'Ambiance correcte, charge raisonnable', score: 2, tag: 'ok' },
+        { text: 'Stressant mais gerable', score: 8, tag: 'moyen' },
+        { text: 'Pression constante, objectifs intenables', score: 18, tag: 'toxique' },
+        { text: 'Harcelement, menaces, surveillance', score: 25, tag: 'danger' }
+      ],
+      insight_bad: 'La pression que tu subis n\'est pas "normale". Le management par le stress est un choix patronal pour extraire plus de productivite.',
+      insight_ok: 'Des conditions de travail decentes, ca devrait etre la norme — pas l\'exception.'
+    },
+    {
+      id: 'evolution',
+      question: 'Ton salaire a-t-il augmente ces 3 dernieres annees ?',
+      sub: 'En dehors des augmentations legales du SMIC.',
+      options: [
+        { text: 'Oui, au-dela de l\'inflation', score: 0, tag: 'ok' },
+        { text: 'Oui, mais moins que l\'inflation', score: 12, tag: 'perte' },
+        { text: 'Non, aucune augmentation', score: 18, tag: 'gel' },
+        { text: 'Mon salaire a baisse (temps partiel subi, etc.)', score: 22, tag: 'recul' }
+      ],
+      insight_bad: 'Sans augmentation au-dessus de l\'inflation, ton salaire reel baisse. Tu es paye moins qu\'il y a 3 ans. Pendant ce temps, les profits de ton employeur ont probablement augmente.',
+      insight_ok: 'Ton salaire suit l\'inflation. C\'est le minimum — pas une generosite.'
+    },
+    {
+      id: 'syndicat',
+      question: 'Y a-t-il un syndicat actif dans ton entreprise ?',
+      sub: '',
+      options: [
+        { text: 'Oui, et je suis membre', score: 0, tag: 'syndique' },
+        { text: 'Oui, mais je n\'en fais pas partie', score: 5, tag: 'passif' },
+        { text: 'Non, pas de syndicat', score: 12, tag: 'rien' },
+        { text: 'La direction empeche toute organisation', score: 20, tag: 'repression' }
+      ],
+      insight_bad: 'Sans representation collective, tu negocies seul face a ton employeur. C\'est le pot de terre contre le pot de fer.',
+      insight_ok: 'Avoir un syndicat, c\'est un rapport de force. C\'est pour ca que le patronat les combat.'
+    },
+    {
+      id: 'conge',
+      question: 'Arrives-tu a prendre tous tes conges et RTT ?',
+      sub: '',
+      options: [
+        { text: 'Oui, sans probleme', score: 0, tag: 'ok' },
+        { text: 'Oui, mais on me fait culpabiliser', score: 8, tag: 'pression' },
+        { text: 'Non, j\'en perds regulierement', score: 15, tag: 'perte' },
+        { text: 'Non, on me les refuse souvent', score: 18, tag: 'refus' }
+      ],
+      insight_bad: 'Les conges payes ont ete arraches par les greves de 1936. Quand on te les refuse, on te vole une conquete sociale.',
+      insight_ok: 'Tu prends tes conges. C\'est un droit — arrache par des greves, pas accorde par generosite.'
+    },
+    {
+      id: 'depart',
+      question: 'Si tu partais demain, que se passerait-il ?',
+      sub: 'Sois honnete avec toi-meme.',
+      options: [
+        { text: 'Je trouverais facilement mieux', score: 0, tag: 'libre' },
+        { text: 'Ca serait difficile mais faisable', score: 5, tag: 'contraint' },
+        { text: 'Je ne peux pas me le permettre financierement', score: 15, tag: 'coince' },
+        { text: 'Je suis completement bloque (credits, famille, pas d\'alternatives)', score: 20, tag: 'piege' }
+      ],
+      insight_bad: 'Si tu ne peux pas partir, tu n\'es pas libre. Un salarie qui ne peut pas dire non est dans un rapport de dependance — pas de collaboration.',
+      insight_ok: 'Tu as une marge de manoeuvre. C\'est un luxe que beaucoup n\'ont pas.'
+    }
+  ];
+
+  var RESULTS = [
+    {
+      min: 0, max: 25,
+      title: 'Situation tenable',
+      text: 'Ton score est relativement bas. Tes conditions de travail semblent correctes — du moins en surface. Mais meme dans une situation "correcte", rappelle-toi : les dividendes du CAC 40 ont explose de 54% en 7 ans. L\'ecart se creuse, meme pour ceux qui s\'en sortent.',
+      level: 'low'
+    },
+    {
+      min: 26, max: 50,
+      title: 'Exploitation moderee',
+      text: 'Ton score revele plusieurs zones de friction. Tu n\'es pas dans la pire situation, mais le systeme grignote tes droits petit a petit : heures non payees ici, pression la, salaire qui stagne... Ce n\'est pas normal. C\'est structurel.',
+      level: 'mid'
+    },
+    {
+      min: 51, max: 75,
+      title: 'Exploitation reelle',
+      text: 'Les indicateurs sont clairs : tu es exploite. Pas au sens figure — au sens economique. Tu produis bien plus de valeur que ce que tu recois, dans des conditions qui ne respectent pas toujours le droit du travail. Tu n\'es pas seul : des millions de salaries sont dans la meme situation.',
+      level: 'high'
+    },
+    {
+      min: 76, max: 200,
+      title: 'Exploitation severe',
+      text: 'Ton score est alarmant. Salaire bas, heures excessives, pression intense, aucune possibilite de partir... Ce que tu vis n\'est pas "le monde du travail" — c\'est un rapport de domination. Le droit du travail existe pour te proteger. Et l\'action collective peut changer les choses.',
+      level: 'high'
+    }
+  ];
+
+  var currentQ = 0;
+  var answers = [];
+
+  function init() {
+    buildProgress();
+    buildCards();
+    showQuestion(0);
+  }
+
+  function buildProgress() {
+    var el = document.getElementById('quizProgress');
+    var html = '';
+    for (var i = 0; i < QUESTIONS.length; i++) {
+      html += '<div class="quiz-progress__bar" data-idx="' + i + '"></div>';
+    }
+    el.innerHTML = html;
+  }
+
+  function updateProgress() {
+    var bars = document.querySelectorAll('.quiz-progress__bar');
+    for (var i = 0; i < bars.length; i++) {
+      bars[i].className = 'quiz-progress__bar';
+      if (i < currentQ) bars[i].classList.add('done');
+      if (i === currentQ) bars[i].classList.add('active');
+    }
+  }
+
+  function buildCards() {
+    var container = document.getElementById('quizCards');
+    var html = '';
+    QUESTIONS.forEach(function(q, idx) {
+      html += '<div class="quiz-card" id="card' + idx + '">';
+      html += '<div class="quiz-card__number">Question ' + (idx + 1) + ' sur ' + QUESTIONS.length + '</div>';
+      html += '<h2>' + q.question + '</h2>';
+      if (q.sub) html += '<p class="quiz-card__sub">' + q.sub + '</p>';
+      html += '<div class="quiz-options">';
+      q.options.forEach(function(opt, oidx) {
+        html += '<button class="quiz-opt" data-q="' + idx + '" data-o="' + oidx + '" onclick="window._quizSelect(' + idx + ',' + oidx + ')">';
+        html += '<span class="quiz-opt__dot"></span>';
+        html += '<span>' + opt.text + '</span>';
+        html += '</button>';
+      });
+      html += '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function showQuestion(idx) {
+    var cards = document.querySelectorAll('.quiz-card');
+    cards.forEach(function(c) { c.classList.remove('visible'); });
+    if (idx < QUESTIONS.length) {
+      var card = document.getElementById('card' + idx);
+      card.classList.add('visible');
+    }
+    updateProgress();
+  }
+
+  window._quizSelect = function(qIdx, oIdx) {
+    var opts = document.querySelectorAll('.quiz-opt[data-q="' + qIdx + '"]');
+    opts.forEach(function(o) { o.classList.remove('selected'); });
+    opts[oIdx].classList.add('selected');
+
+    answers[qIdx] = QUESTIONS[qIdx].options[oIdx];
+
+    setTimeout(function() {
+      currentQ = qIdx + 1;
+      if (currentQ >= QUESTIONS.length) {
+        showResult();
+      } else {
+        showQuestion(currentQ);
+      }
+    }, 400);
+  };
+
+  function showResult() {
+    var cards = document.querySelectorAll('.quiz-card');
+    cards.forEach(function(c) { c.classList.remove('visible'); });
+    document.getElementById('quizProgress').style.display = 'none';
+
+    var total = 0;
+    answers.forEach(function(a) { total += a.score; });
+    var score = Math.min(Math.round((total / 175) * 100), 100);
+
+    var result = RESULTS[0];
+    for (var i = 0; i < RESULTS.length; i++) {
+      if (score >= RESULTS[i].min && score <= RESULTS[i].max) {
+        result = RESULTS[i];
+        break;
+      }
+    }
+
+    var circle = document.getElementById('resultCircle');
+    circle.className = 'result-score';
+    if (result.level === 'low') circle.classList.add('score-low');
+    else if (result.level === 'mid') circle.classList.add('score-mid');
+    else circle.classList.add('score-high');
+
+    document.getElementById('resultNumber').textContent = score;
+    document.getElementById('resultTitle').textContent = result.title;
+    document.getElementById('resultText').textContent = result.text;
+    document.getElementById('shareScore').textContent = score + '/100';
+    document.getElementById('shareLabel').textContent = result.title;
+
+    // Breakdown
+    var listEl = document.getElementById('breakdownList');
+    var breakdownHtml = '';
+    QUESTIONS.forEach(function(q, idx) {
+      if (!answers[idx]) return;
+      var a = answers[idx];
+      var isBad = a.score >= 10;
+      var icon = isBad ? 'bad' : 'ok';
+      var symbol = isBad ? '!' : '&#10003;';
+      var insight = isBad ? q.insight_bad : q.insight_ok;
+      breakdownHtml += '<div class="breakdown-item">';
+      breakdownHtml += '<div class="breakdown-item__icon ' + icon + '">' + symbol + '</div>';
+      breakdownHtml += '<div class="breakdown-item__text">' + insight + '</div>';
+      breakdownHtml += '</div>';
+    });
+    listEl.innerHTML = breakdownHtml;
+
+    var resultEl = document.getElementById('quizResult');
+    resultEl.classList.add('visible');
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Store for sharing
+    window._quizScore = score;
+    window._quizLabel = result.title;
+  }
+
+  window.shareResult = function() {
+    var text = 'Mon score d\'exploitation au travail : ' + window._quizScore + '/100 (' + window._quizLabel + '). Fais le test : ';
+    var url = window.location.href.split('?')[0];
+    if (navigator.share) {
+      navigator.share({ title: 'Score d\'exploitation', text: text, url: url });
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(text + url).then(function() {
+        alert('Lien copie !');
+      });
+    }
+  };
+
+  window.restartQuiz = function() {
+    currentQ = 0;
+    answers = [];
+    document.getElementById('quizResult').classList.remove('visible');
+    document.getElementById('quizProgress').style.display = 'flex';
+    buildCards();
+    showQuestion(0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.submitEmail = function() {
+    var email = document.getElementById('emailInput').value;
+    if (!email || email.indexOf('@') === -1) {
+      document.getElementById('emailInput').style.borderColor = 'var(--red)';
+      return;
+    }
+    // In production: send to API/n8n webhook
+    console.log('LEAD:', { email: email, score: window._quizScore, label: window._quizLabel, answers: answers.map(function(a) { return a.tag; }) });
+    document.getElementById('emailForm').style.display = 'none';
+    document.getElementById('emailSuccess').style.display = 'block';
+  };
+
+  init();
+})();
+</script>
+
+</body>
+</html>

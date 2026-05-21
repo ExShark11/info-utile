@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ton patron gagne combien ? — Compteur en temps reel</title>
+  <meta name="description" content="Regarde en temps reel combien gagne un PDG du CAC 40 pendant que tu travailles. Les chiffres sont reels.">
+  <meta property="og:title" content="Ton patron gagne combien pendant que tu travailles ?">
+  <meta property="og:description" content="Compteur en temps reel : ton salaire vs celui d'un PDG du CAC 40. Les chiffres sont edifiants.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .counter-page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 100px 24px 60px;
+      min-height: 100vh;
+    }
+
+    /* --- Setup form --- */
+    .setup {
+      text-align: center;
+    }
+    .setup h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .setup__sub {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .setup-field {
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .setup-field label {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+    .setup-field input,
+    .setup-field select {
+      width: 100%;
+      padding: 16px 18px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .setup-field input:focus,
+    .setup-field select:focus {
+      border-color: var(--accent-mid);
+    }
+    .setup-field select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A6178' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 18px center;
+      padding-right: 44px;
+    }
+
+    .start-btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 18px 48px;
+      font-family: 'Inter', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .start-btn:hover {
+      background: var(--red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(198,40,40,0.3);
+    }
+
+    /* --- Counter display --- */
+    .counter {
+      display: none;
+      text-align: center;
+    }
+    .counter.active { display: block; }
+
+    .counter__header {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-light);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .counter__timer {
+      font-family: 'Inter', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 40px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .counter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .counter-box {
+      padding: 32px 20px;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .counter-box--you {
+      background: var(--highlight-bg);
+      border: 2px solid var(--border);
+    }
+    .counter-box--ceo {
+      background: linear-gradient(135deg, #1a1a2e, #16213E);
+      color: white;
+    }
+    .counter-box__label {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      opacity: 0.7;
+    }
+    .counter-box__amount {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .counter-box--you .counter-box__amount { color: var(--accent); }
+    .counter-box--ceo .counter-box__amount { color: #FF6B6B; }
+    .counter-box__persec {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      opacity: 0.6;
+    }
+
+    /* --- Ratio bar --- */
+    .ratio-section {
+      margin-bottom: 32px;
+    }
+    .ratio-bar {
+      height: 40px;
+      background: var(--highlight-bg);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      margin-bottom: 8px;
+    }
+    .ratio-bar__you {
+      background: var(--accent-mid);
+      min-width: 3px;
+      border-radius: 20px 0 0 20px;
+      transition: width 0.5s ease;
+    }
+    .ratio-bar__ceo {
+      background: var(--red);
+      flex: 1;
+      border-radius: 0 20px 20px 0;
+    }
+    .ratio-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .ratio-text strong {
+      color: var(--red);
+      font-weight: 800;
+    }
+
+    /* --- Milestones --- */
+    .milestones {
+      text-align: left;
+      margin-bottom: 32px;
+    }
+    .milestones h3 {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-light);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .milestone {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      transition: all 0.4s;
+    }
+    .milestone.pending {
+      background: var(--highlight-bg);
+      color: var(--text-light);
+    }
+    .milestone.reached {
+      background: #FFEBEE;
+      color: var(--red-dark);
+      font-weight: 600;
+    }
+    .milestone__icon {
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* --- Share card --- */
+    .counter-share {
+      background: linear-gradient(135deg, #1a1a2e, #16213E);
+      color: white;
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin: 32px 0;
+      text-align: center;
+    }
+    .counter-share__big {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .counter-share__big span { color: #FF6B6B; }
+    .counter-share__text {
+      font-size: 15px;
+      opacity: 0.8;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .counter-share__url {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      opacity: 0.4;
+    }
+
+    .counter-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+    .counter-actions .quiz-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .btn--outline {
+      background: var(--white);
+      color: var(--accent);
+      border: 2px solid var(--border) !important;
+    }
+    .btn--outline:hover { border-color: var(--accent-mid) !important; }
+    .btn--red {
+      background: var(--red);
+      color: white;
+    }
+    .btn--red:hover {
+      background: var(--red-dark);
+      transform: translateY(-1px);
+    }
+
+    /* --- Transition --- */
+    .counter-transition {
+      background: var(--bg-warm);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin: 32px 0;
+      text-align: left;
+    }
+    .counter-transition h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .counter-transition p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .counter-transition a {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--red);
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .counter-grid { grid-template-columns: 1fr; }
+      .counter-actions { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="../index.html" class="site-header__logo">
+      <span class="npar-badge"><span class="npar-badge__npa">INFO</span><span class="npar-badge__r">UTILE</span></span>
+    </a>
+    <nav>
+      <ul class="site-header__nav">
+        <li><a href="../finance/">Finance</a></li>
+        <li><a href="../travail/">Travail</a></li>
+        <li><a href="../logement/">Logement</a></li>
+        <li><a href="../rejoindre/">Agir</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="counter-page">
+
+  <!-- SETUP -->
+  <div class="setup" id="setup">
+    <h1>Ton patron gagne combien pendant que tu travailles ?</h1>
+    <p class="setup__sub">Entre ton salaire. Choisis un PDG. Regarde les compteurs tourner.</p>
+
+    <div class="setup-field">
+      <label>Ton salaire net mensuel (euros)</label>
+      <input type="number" id="inputSalary" value="1800" min="100" max="20000" step="50">
+    </div>
+
+    <div class="setup-field">
+      <label>Compare-toi a...</label>
+      <select id="inputCeo">
+        <option value="carlos_tavares" data-salary="36500000" data-company="Stellantis">Carlos Tavares — Stellantis (36,5M euros/an)</option>
+        <option value="bernard_arnault" data-salary="16200000" data-company="LVMH">Bernard Arnault — LVMH (16,2M euros/an)</option>
+        <option value="daniel_julien" data-salary="25200000" data-company="Teleperformance">Daniel Julien — Teleperformance (25,2M euros/an)</option>
+        <option value="paul_hudson" data-salary="12400000" data-company="Sanofi">Paul Hudson — Sanofi (12,4M euros/an)</option>
+        <option value="alexandre_bompard" data-salary="9700000" data-company="Carrefour">Alexandre Bompard — Carrefour (9,7M euros/an)</option>
+        <option value="patrick_pouyanne" data-salary="6300000" data-company="TotalEnergies">Patrick Pouyanne — TotalEnergies (6,3M euros/an)</option>
+        <option value="christel_heydemann" data-salary="4600000" data-company="Orange">Christel Heydemann — Orange (4,6M euros/an)</option>
+        <option value="moyenne_cac40" data-salary="7400000" data-company="CAC 40">Moyenne PDG CAC 40 (7,4M euros/an)</option>
+      </select>
+    </div>
+
+    <button class="start-btn" onclick="startCounter()">Lancer le compteur</button>
+  </div>
+
+  <!-- COUNTER -->
+  <div class="counter" id="counter">
+    <div class="counter__header">Temps ecoule</div>
+    <div class="counter__timer" id="timer">00:00</div>
+
+    <div class="counter-grid">
+      <div class="counter-box counter-box--you">
+        <div class="counter-box__label">Toi</div>
+        <div class="counter-box__amount" id="youAmount">0,00 &euro;</div>
+        <div class="counter-box__persec" id="youRate"></div>
+      </div>
+      <div class="counter-box counter-box--ceo">
+        <div class="counter-box__label" id="ceoName">PDG</div>
+        <div class="counter-box__amount" id="ceoAmount">0,00 &euro;</div>
+        <div class="counter-box__persec" id="ceoRate"></div>
+      </div>
+    </div>
+
+    <div class="ratio-section">
+      <div class="ratio-bar">
+        <div class="ratio-bar__you" id="ratioYou"></div>
+        <div class="ratio-bar__ceo"></div>
+      </div>
+      <div class="ratio-text" id="ratioText"></div>
+    </div>
+
+    <div class="milestones" id="milestones">
+      <h3>Jalons</h3>
+    </div>
+
+    <!-- Share card (appears after 30s) -->
+    <div class="counter-share" id="shareCard" style="display:none">
+      <div class="counter-share__big">x<span id="shareRatio"></span></div>
+      <div class="counter-share__text" id="shareText"></div>
+      <div class="counter-share__url">infoutile.fr/compteur</div>
+    </div>
+
+    <div class="counter-actions">
+      <button class="quiz-btn btn--outline" onclick="shareCounter()">Partager</button>
+      <button class="quiz-btn btn--outline" onclick="resetCounter()">Recommencer</button>
+      <a href="../quiz/" class="quiz-btn btn--red">Fais le quiz exploitation</a>
+    </div>
+
+    <div class="counter-transition">
+      <h3>Ce n'est pas un bug. C'est le systeme.</h3>
+      <p>L'ecart entre ton salaire et celui d'un PDG n'est pas une question de merite. C'est une question de pouvoir : qui decide, qui produit, et qui empoche. Les travailleurs produisent la richesse. Les actionnaires et les dirigeants la captent.</p>
+      <p>En 2024, les dividendes du CAC 40 ont atteint 98,5 milliards d'euros. Pendant que ton salaire stagnait.</p>
+      <a href="../rejoindre/">Comprendre pourquoi — et agir &rarr;</a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p>Info Utile — Contenu independant. Donnees sourcees. <a href="../rejoindre/">Nous rejoindre</a>.</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  var timerInterval = null;
+  var startTime = 0;
+  var userPerSec = 0;
+  var ceoPerSec = 0;
+  var ceoCompany = '';
+  var milestoneReached = {};
+
+  var MILESTONES_TPL = [
+    { seconds: 10, getText: function(c, r) { return 'En 10 secondes, le PDG de ' + c + ' a gagne ' + fmt(ceoPerSec * 10) + ' euros. Toi : ' + fmt(userPerSec * 10) + ' euros.'; }},
+    { seconds: 30, getText: function(c, r) { return 'En 30 secondes, l\'ecart est deja de ' + fmt((ceoPerSec - userPerSec) * 30) + ' euros.'; }},
+    { seconds: 60, getText: function(c, r) { return '1 minute. Le PDG a gagne ' + fmt(ceoPerSec * 60) + ' euros. C\'est peut-etre plus que ton salaire journalier.'; }},
+    { seconds: 120, getText: function(c, r) { return '2 minutes. Ecart : x' + Math.round(ceoPerSec / userPerSec) + '. Le systeme fonctionne exactement comme prevu.'; }},
+    { seconds: 300, getText: function(c, r) { return '5 minutes. Le PDG a gagne ' + fmt(ceoPerSec * 300) + ' euros. Pour toi, il faudrait ' + Math.round((ceoPerSec * 300) / (userPerSec * 3600 * 7)) + ' jours de travail pour gagner autant.'; }}
+  ];
+
+  function fmt(n) {
+    return n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ').replace('.', ',');
+  }
+
+  function fmtInt(n) {
+    return Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  }
+
+  window.startCounter = function() {
+    var salary = parseFloat(document.getElementById('inputSalary').value);
+    if (!salary || salary < 100) return;
+
+    var sel = document.getElementById('inputCeo');
+    var opt = sel.options[sel.selectedIndex];
+    var ceoSalary = parseFloat(opt.dataset.salary);
+    ceoCompany = opt.dataset.company;
+
+    // Per second (based on 1607h/year legal working time)
+    var yearlyHours = 1607;
+    userPerSec = (salary * 12) / (yearlyHours * 3600);
+    ceoPerSec = ceoSalary / (yearlyHours * 3600);
+
+    document.getElementById('ceoName').textContent = opt.textContent.split('—')[0].trim();
+    document.getElementById('youRate').textContent = fmt(userPerSec * 60) + ' euros/min';
+    document.getElementById('ceoRate').textContent = fmt(ceoPerSec * 60) + ' euros/min';
+
+    // Build milestones
+    var mHtml = '<h3>Jalons</h3>';
+    MILESTONES_TPL.forEach(function(m, i) {
+      mHtml += '<div class="milestone pending" id="ms' + i + '"><span class="milestone__icon">&#9711;</span><span>...</span></div>';
+    });
+    document.getElementById('milestones').innerHTML = mHtml;
+
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('counter').classList.add('active');
+
+    milestoneReached = {};
+    startTime = Date.now();
+    timerInterval = setInterval(tick, 50);
+  };
+
+  function tick() {
+    var elapsed = (Date.now() - startTime) / 1000;
+    var mins = Math.floor(elapsed / 60);
+    var secs = Math.floor(elapsed % 60);
+    document.getElementById('timer').textContent =
+      (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+    var youTotal = userPerSec * elapsed;
+    var ceoTotal = ceoPerSec * elapsed;
+
+    document.getElementById('youAmount').innerHTML = fmt(youTotal) + ' &euro;';
+    document.getElementById('ceoAmount').innerHTML = fmt(ceoTotal) + ' &euro;';
+
+    // Ratio bar
+    var pct = Math.max(0.5, (youTotal / (youTotal + ceoTotal)) * 100);
+    document.getElementById('ratioYou').style.width = pct + '%';
+    var ratio = Math.round(ceoTotal / Math.max(youTotal, 0.01));
+    document.getElementById('ratioText').innerHTML = 'Le PDG gagne <strong>x' + ratio + '</strong> plus que toi';
+
+    // Milestones
+    MILESTONES_TPL.forEach(function(m, i) {
+      if (elapsed >= m.seconds && !milestoneReached[i]) {
+        milestoneReached[i] = true;
+        var el = document.getElementById('ms' + i);
+        el.className = 'milestone reached';
+        el.innerHTML = '<span class="milestone__icon">&#9888;</span><span>' + m.getText(ceoCompany, ratio) + '</span>';
+      }
+    });
+
+    // Show share card after 30s
+    if (elapsed >= 30) {
+      var card = document.getElementById('shareCard');
+      if (card.style.display === 'none') {
+        card.style.display = 'block';
+        document.getElementById('shareRatio').textContent = ratio;
+        document.getElementById('shareText').textContent =
+          'En ' + Math.round(elapsed) + ' secondes, le PDG de ' + ceoCompany +
+          ' a gagne ' + fmtInt(ceoTotal) + ' euros. Toi : ' + fmt(youTotal) + ' euros.';
+      } else {
+        document.getElementById('shareRatio').textContent = ratio;
+        document.getElementById('shareText').textContent =
+          'En ' + Math.round(elapsed) + ' secondes, le PDG de ' + ceoCompany +
+          ' a gagne ' + fmtInt(ceoTotal) + ' euros. Toi : ' + fmt(youTotal) + ' euros.';
+      }
+    }
+  }
+
+  window.shareCounter = function() {
+    var elapsed = (Date.now() - startTime) / 1000;
+    var ratio = Math.round((ceoPerSec * elapsed) / Math.max(userPerSec * elapsed, 0.01));
+    var text = 'En ' + Math.round(elapsed) + 's, le PDG de ' + ceoCompany +
+      ' a gagne x' + ratio + ' plus que moi. Fais le test : ';
+    var url = window.location.href.split('?')[0];
+    if (navigator.share) {
+      navigator.share({ title: 'Compteur d\'inegalite', text: text, url: url });
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(text + url).then(function() {
+        alert('Lien copie !');
+      });
+    }
+  };
+
+  window.resetCounter = function() {
+    clearInterval(timerInterval);
+    document.getElementById('counter').classList.remove('active');
+    document.getElementById('setup').style.display = 'block';
+    document.getElementById('shareCard').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+})();
+</script>
+
+</body>
+</html>

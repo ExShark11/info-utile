@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulateur d'aides sociales — Decouvre ce que l'Etat te doit</title>
+  <meta name="description" content="10 milliards d'euros d'aides non reclamees chaque annee. Reponds a 5 questions et decouvre les aides auxquelles tu as droit.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .sim-wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 100px 24px 60px;
+      min-height: 100vh;
+    }
+
+    .sim-hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .sim-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .sim-hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .sim-hero .stat-block {
+      text-align: center;
+      padding: 32px 20px;
+      margin: 24px 0 0;
+      background: var(--highlight-bg);
+      border-radius: 12px;
+    }
+    .sim-hero .stat-block .number {
+      font-family: 'Inter', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .sim-hero .stat-block .label {
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+
+    /* --- Form --- */
+    .sim-form {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin-bottom: 32px;
+    }
+    .sim-form h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+
+    .sim-field {
+      margin-bottom: 20px;
+    }
+    .sim-field label {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .sim-field input,
+    .sim-field select {
+      width: 100%;
+      padding: 14px 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .sim-field input:focus,
+    .sim-field select:focus { border-color: var(--accent-mid); }
+    .sim-field select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A6178' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 40px;
+    }
+    .sim-field__hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    .sim-submit {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-top: 8px;
+    }
+    .sim-submit:hover {
+      background: var(--red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(198,40,40,0.25);
+    }
+
+    /* --- Results --- */
+    .sim-results {
+      display: none;
+    }
+    .sim-results.visible { display: block; }
+
+    .sim-results__header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .sim-results__header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .sim-results__total {
+      font-family: 'Inter', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--red);
+      line-height: 1;
+    }
+    .sim-results__total-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .aide-card {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .aide-card.eligible { border-left: 4px solid #2E7D32; }
+    .aide-card.maybe { border-left: 4px solid #E65100; }
+    .aide-card.ineligible { border-left: 4px solid var(--border); opacity: 0.5; }
+
+    .aide-card__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .aide-card__name {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .aide-card__amount {
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #2E7D32;
+      white-space: nowrap;
+    }
+    .aide-card.maybe .aide-card__amount { color: #E65100; }
+    .aide-card.ineligible .aide-card__amount { color: var(--text-light); }
+
+    .aide-card__status {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 50px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .status-eligible { background: #E8F5E9; color: #2E7D32; }
+    .status-maybe { background: #FFF3E0; color: #E65100; }
+    .status-ineligible { background: var(--highlight-bg); color: var(--text-light); }
+
+    .aide-card__desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 10px;
+    }
+    .aide-card__link {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-mid);
+      text-decoration: none;
+    }
+    .aide-card__link:hover { color: var(--red); }
+
+    /* --- Email gate --- */
+    .sim-email-gate {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin: 32px 0;
+      text-align: center;
+    }
+    .sim-email-gate h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .sim-email-gate p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .sim-email-gate__form {
+      display: flex;
+      gap: 10px;
+    }
+    .sim-email-gate__input {
+      flex: 1;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      outline: none;
+    }
+    .sim-email-gate__input:focus { border-color: var(--accent-mid); }
+    .sim-email-gate__btn {
+      padding: 14px 24px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .sim-email-gate__btn:hover { background: var(--accent-mid); }
+    .sim-email-gate__success {
+      display: none;
+      padding: 14px;
+      background: #E8F5E9;
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #2E7D32;
+      font-weight: 500;
+    }
+
+    /* --- Transition --- */
+    .sim-transition {
+      background: var(--bg-warm);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin: 32px 0;
+    }
+    .sim-transition h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .sim-transition p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .sim-transition a {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--red);
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .sim-email-gate__form { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="../index.html" class="site-header__logo">
+      <span class="npar-badge"><span class="npar-badge__npa">INFO</span><span class="npar-badge__r">UTILE</span></span>
+    </a>
+    <nav>
+      <ul class="site-header__nav">
+        <li><a href="../finance/" class="active">Finance</a></li>
+        <li><a href="../travail/">Travail</a></li>
+        <li><a href="../logement/">Logement</a></li>
+        <li><a href="../rejoindre/">Agir</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="sim-wrap">
+
+  <div class="sim-hero">
+    <h1>L'Etat te doit de l'argent</h1>
+    <p>Chaque annee, des milliards d'euros d'aides ne sont pas reclames. Reponds a 5 questions et decouvre ce que tu rates.</p>
+    <div class="stat-block">
+      <div class="number">10 milliards euros</div>
+      <div class="label">d'aides sociales non reclamees chaque annee en France</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="sim-form" id="simForm">
+    <h2>Ta situation en 5 questions</h2>
+
+    <div class="sim-field">
+      <label>Ton revenu net mensuel (euros)</label>
+      <input type="number" id="fRevenu" value="" placeholder="Ex : 1500" min="0" max="50000" step="50">
+      <div class="sim-field__hint">Salaire net apres impots, primes et indemnites comprises</div>
+    </div>
+
+    <div class="sim-field">
+      <label>Ta situation</label>
+      <select id="fSituation">
+        <option value="salarie">Salarie(e)</option>
+        <option value="independant">Independant(e) / auto-entrepreneur</option>
+        <option value="chomage">Au chomage</option>
+        <option value="etudiant">Etudiant(e)</option>
+        <option value="retraite">Retraite(e)</option>
+        <option value="inactif">Sans emploi (non inscrit)</option>
+      </select>
+    </div>
+
+    <div class="sim-field">
+      <label>Ton logement</label>
+      <select id="fLogement">
+        <option value="locataire">Locataire</option>
+        <option value="proprio">Proprietaire</option>
+        <option value="heberge">Heberge(e) chez quelqu'un</option>
+        <option value="sans">Sans logement fixe</option>
+      </select>
+    </div>
+
+    <div class="sim-field">
+      <label>Ton loyer mensuel (charges comprises)</label>
+      <input type="number" id="fLoyer" value="" placeholder="Ex : 700" min="0" max="5000" step="10">
+      <div class="sim-field__hint">0 si tu n'en paies pas</div>
+    </div>
+
+    <div class="sim-field">
+      <label>Composition du foyer</label>
+      <select id="fFoyer">
+        <option value="seul">Seul(e)</option>
+        <option value="couple">En couple</option>
+        <option value="enfant1">Seul(e) avec 1 enfant</option>
+        <option value="enfant2">Seul(e) avec 2+ enfants</option>
+        <option value="couple_enfant1">En couple avec 1 enfant</option>
+        <option value="couple_enfant2">En couple avec 2+ enfants</option>
+      </select>
+    </div>
+
+    <button class="sim-submit" onclick="simulate()">Decouvrir mes aides</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="sim-results" id="simResults">
+    <div class="sim-results__header">
+      <h2>Tu pourrais toucher jusqu'a</h2>
+      <div class="sim-results__total" id="totalAmount"></div>
+      <div class="sim-results__total-label">euros par mois</div>
+    </div>
+
+    <div id="aidesList"></div>
+
+    <!-- Partial gate -->
+    <div class="sim-email-gate" id="emailGate">
+      <h3>Recois ton recapitulatif personnalise</h3>
+      <p>On t'envoie la liste de tes aides avec les liens directs pour faire tes demandes. Gratuit, zero spam.</p>
+      <div class="sim-email-gate__form" id="emailForm">
+        <input type="email" class="sim-email-gate__input" id="emailInput" placeholder="ton@email.fr" autocomplete="email">
+        <button class="sim-email-gate__btn" onclick="submitEmail()">Recevoir</button>
+      </div>
+      <div class="sim-email-gate__success" id="emailSuccess">
+        C'est envoye ! Verifie ta boite mail.
+      </div>
+    </div>
+
+    <div class="sim-transition">
+      <h3>Pourquoi l'Etat ne te previent pas ?</h3>
+      <p>Le non-recours aux aides sociales n'est pas un accident. C'est une politique. En rendant les demarches complexes, en multipliant les formulaires et les conditions, l'Etat economise des milliards — sur ton dos.</p>
+      <p>Quand on te dit que "la France depense trop en aides sociales", rappelle-toi que 10 milliards ne sont meme pas reclames. Le vrai scandale, ce n'est pas la fraude sociale (estimee a 1 milliard). C'est le non-recours (10 milliards).</p>
+      <a href="../rejoindre/">Comprendre le systeme — et agir &rarr;</a>
+    </div>
+
+    <div style="text-align:center;margin:24px 0;">
+      <button onclick="resetSim()" style="padding:12px 28px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;background:var(--white);color:var(--accent);border:2px solid var(--border);border-radius:50px;cursor:pointer;">Refaire la simulation</button>
+      <a href="../quiz/" style="display:inline-block;margin-left:12px;padding:12px 28px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;background:var(--red);color:white;border-radius:50px;text-decoration:none;">Quiz exploitation</a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p>Info Utile — Contenu independant. Donnees sourcees. <a href="../rejoindre/">Nous rejoindre</a>.</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  var AIDES = [
+    {
+      id: 'prime_activite',
+      name: 'Prime d\'activite',
+      desc: 'Complement de revenu pour les travailleurs modestes. Versee par la CAF, elle peut atteindre 300 euros/mois. Un tiers des beneficiaires potentiels ne la demandent pas.',
+      url: 'https://www.caf.fr/allocataires/droits-et-prestations/connaitre-vos-droits-selon-votre-situation/vous-etes-salarie/la-prime-d-activite',
+      eligible: function(r, s, l, lo, f) {
+        return (s === 'salarie' || s === 'independant') && r > 0 && r < 1900;
+      },
+      maybe: function(r, s) {
+        return (s === 'salarie' || s === 'independant') && r >= 1900 && r < 2200;
+      },
+      estimate: function(r, f) {
+        if (r < 800) return 250;
+        if (r < 1200) return 200;
+        if (r < 1600) return 130;
+        return 70;
+      }
+    },
+    {
+      id: 'apl',
+      name: 'APL (Aide Personnalisee au Logement)',
+      desc: 'Aide au logement versee par la CAF. Depend du loyer, des revenus et de la zone geographique. 20% des locataires eligibles ne font pas la demande.',
+      url: 'https://www.caf.fr/allocataires/droits-et-prestations/connaitre-vos-droits-selon-votre-situation/vous-louez-un-logement',
+      eligible: function(r, s, l, lo, f) {
+        return l === 'locataire' && r < 2200 && lo > 200;
+      },
+      maybe: function(r, s, l, lo) {
+        return l === 'locataire' && r >= 2200 && r < 2800 && lo > 400;
+      },
+      estimate: function(r, f) {
+        if (r < 1000) return 280;
+        if (r < 1500) return 200;
+        if (r < 2000) return 120;
+        return 60;
+      }
+    },
+    {
+      id: 'css',
+      name: 'Complementaire Sante Solidaire (CSS)',
+      desc: 'Mutuelle gratuite ou a 1 euro/jour selon tes revenus. 50% des ayants droit ne la connaissent pas. Couvre le dentaire, l\'optique, les protheses.',
+      url: 'https://www.ameli.fr/assure/droits-demarches/difficultes-acces-droits-soins/complementaire-sante-solidaire',
+      eligible: function(r, s, l, lo, f) {
+        var seuil = f.indexOf('couple') >= 0 ? 1600 : 1000;
+        return r < seuil;
+      },
+      maybe: function(r, s, l, lo, f) {
+        var seuil = f.indexOf('couple') >= 0 ? 2100 : 1350;
+        var seuilBas = f.indexOf('couple') >= 0 ? 1600 : 1000;
+        return r >= seuilBas && r < seuil;
+      },
+      estimate: function(r, f) {
+        if (r < 800) return 50; // gratuit = economie mutuelle
+        return 30; // participation symbolique
+      }
+    },
+    {
+      id: 'cheque_energie',
+      name: 'Cheque energie',
+      desc: 'Aide pour payer les factures d\'electricite, gaz, fioul. De 48 a 277 euros/an selon les revenus. Envoye automatiquement MAIS certains ne le recoivent pas (changement d\'adresse, primo-declarants).',
+      url: 'https://chequeenergie.gouv.fr/',
+      eligible: function(r) {
+        return r < 1800;
+      },
+      maybe: function(r) {
+        return r >= 1800 && r < 2200;
+      },
+      estimate: function(r) {
+        if (r < 1000) return 23; // 277/12
+        if (r < 1500) return 15;
+        return 8;
+      }
+    },
+    {
+      id: 'rsa',
+      name: 'RSA (Revenu de Solidarite Active)',
+      desc: 'Revenu minimum garanti pour les personnes sans ressources. 607 euros/mois pour une personne seule. Le taux de non-recours est de 34% — un tiers des ayants droit ne le touchent pas.',
+      url: 'https://www.caf.fr/allocataires/droits-et-prestations/connaitre-vos-droits-selon-votre-situation/vous-navez-pas-ou-peu-de-ressources/le-rsa',
+      eligible: function(r, s) {
+        return r < 300 && (s === 'chomage' || s === 'inactif');
+      },
+      maybe: function(r, s) {
+        return r >= 300 && r < 607 && (s === 'chomage' || s === 'inactif');
+      },
+      estimate: function(r) {
+        return Math.max(0, 607 - r);
+      }
+    },
+    {
+      id: 'aide_transport',
+      name: 'Aide au transport / Forfait Mobilite',
+      desc: 'Reduction sur les transports en commun selon tes revenus. A Paris (Navigo) : reduction 50% a 75%. En region : cheque mobilite, aide au permis. Souvent meconnu.',
+      url: 'https://www.service-public.fr/particuliers/vosdroits/F34793',
+      eligible: function(r) {
+        return r < 1500;
+      },
+      maybe: function(r) {
+        return r >= 1500 && r < 2200;
+      },
+      estimate: function(r) {
+        if (r < 1000) return 55;
+        return 30;
+      }
+    },
+    {
+      id: 'bourse',
+      name: 'Bourse sur criteres sociaux (Etudiant)',
+      desc: 'De 1 454 a 6 335 euros/an selon l\'echelon. Comprend aussi l\'exoneration des droits d\'inscription et de la CVEC. Beaucoup d\'etudiants ne demandent pas les echelons superieurs.',
+      url: 'https://www.etudiant.gouv.fr/fr/bourse-sur-criteres-sociaux-702',
+      eligible: function(r, s) {
+        return s === 'etudiant';
+      },
+      maybe: function() { return false; },
+      estimate: function(r) {
+        if (r < 500) return 500;
+        return 250;
+      }
+    },
+    {
+      id: 'aspa',
+      name: 'ASPA (Allocation de Solidarite aux Personnes Agees)',
+      desc: 'Minimum vieillesse : 1 012 euros/mois pour une personne seule. Le taux de non-recours depasse 50% — la moitie des retraites pauvres ne la demandent pas.',
+      url: 'https://www.service-public.fr/particuliers/vosdroits/F16871',
+      eligible: function(r, s) {
+        return s === 'retraite' && r < 1000;
+      },
+      maybe: function(r, s) {
+        return s === 'retraite' && r >= 1000 && r < 1200;
+      },
+      estimate: function(r) {
+        return Math.max(0, 1012 - r);
+      }
+    }
+  ];
+
+  window.simulate = function() {
+    var revenu = parseFloat(document.getElementById('fRevenu').value) || 0;
+    var situation = document.getElementById('fSituation').value;
+    var logement = document.getElementById('fLogement').value;
+    var loyer = parseFloat(document.getElementById('fLoyer').value) || 0;
+    var foyer = document.getElementById('fFoyer').value;
+
+    var results = [];
+    var total = 0;
+
+    AIDES.forEach(function(aide) {
+      var status = 'ineligible';
+      var montant = 0;
+      if (aide.eligible(revenu, situation, logement, loyer, foyer)) {
+        status = 'eligible';
+        montant = aide.estimate(revenu, foyer);
+        total += montant;
+      } else if (aide.maybe(revenu, situation, logement, loyer, foyer)) {
+        status = 'maybe';
+        montant = aide.estimate(revenu, foyer);
+        total += Math.round(montant * 0.5);
+      }
+      results.push({ aide: aide, status: status, montant: montant });
+    });
+
+    // Sort: eligible first, then maybe, then ineligible
+    results.sort(function(a, b) {
+      var order = { eligible: 0, maybe: 1, ineligible: 2 };
+      return order[a.status] - order[b.status];
+    });
+
+    document.getElementById('totalAmount').textContent = total + ' euros';
+
+    var html = '';
+    results.forEach(function(r) {
+      html += '<div class="aide-card ' + r.status + '">';
+      html += '<div class="aide-card__header">';
+      html += '<div class="aide-card__name">' + r.aide.name + '</div>';
+      if (r.status !== 'ineligible') {
+        html += '<div class="aide-card__amount">~' + r.montant + ' euros/mois</div>';
+      }
+      html += '</div>';
+      var statusText = r.status === 'eligible' ? 'Probablement eligible' : (r.status === 'maybe' ? 'A verifier' : 'Non concerne');
+      var statusClass = r.status === 'eligible' ? 'status-eligible' : (r.status === 'maybe' ? 'status-maybe' : 'status-ineligible');
+      html += '<div class="aide-card__status ' + statusClass + '">' + statusText + '</div>';
+      html += '<div class="aide-card__desc">' + r.aide.desc + '</div>';
+      if (r.status !== 'ineligible') {
+        html += '<a href="' + r.aide.url + '" target="_blank" rel="noopener" class="aide-card__link">Faire la demande &rarr;</a>';
+      }
+      html += '</div>';
+    });
+    document.getElementById('aidesList').innerHTML = html;
+
+    document.getElementById('simForm').style.display = 'none';
+    document.getElementById('simResults').classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Log for analytics
+    console.log('SIMULATION:', { revenu: revenu, situation: situation, logement: logement, loyer: loyer, foyer: foyer, total: total });
+  };
+
+  window.submitEmail = function() {
+    var email = document.getElementById('emailInput').value;
+    if (!email || email.indexOf('@') === -1) {
+      document.getElementById('emailInput').style.borderColor = 'var(--red)';
+      return;
+    }
+    console.log('LEAD:', { email: email, source: 'simulateur_aides' });
+    document.getElementById('emailForm').style.display = 'none';
+    document.getElementById('emailSuccess').style.display = 'block';
+  };
+
+  window.resetSim = function() {
+    document.getElementById('simForm').style.display = 'block';
+    document.getElementById('simResults').classList.remove('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+})();
+</script>
+
+</body>
+</html>

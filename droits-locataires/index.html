@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ton proprio peut-il faire ca ? — Guide droits locataires</title>
+  <meta name="description" content="20 situations concretes, reponses juridiques claires. Connais tes droits face a ton proprietaire.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .droits-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 100px 24px 60px;
+    }
+
+    .droits-hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .droits-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.2;
+      margin-bottom: 12px;
+    }
+    .droits-hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* --- Filter --- */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .filter-btn {
+      padding: 8px 18px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border: 2px solid var(--border);
+      border-radius: 50px;
+      background: var(--white);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--accent-mid); }
+    .filter-btn.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* --- FAQ items --- */
+    .faq-item {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .faq-item:hover { border-color: var(--accent-mid); }
+    .faq-item.open { border-color: var(--red); }
+
+    .faq-q {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 20px 22px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .faq-q__verdict {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .verdict-non { background: #FFEBEE; color: var(--red); }
+    .verdict-oui { background: #FFF3E0; color: #E65100; }
+    .verdict-depend { background: #E3F2FD; color: #1565C0; }
+
+    .faq-q__text {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .faq-q__arrow {
+      font-size: 18px;
+      color: var(--text-light);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-q__arrow { transform: rotate(180deg); }
+
+    .faq-a {
+      display: none;
+      padding: 0 22px 22px;
+      padding-left: 76px;
+    }
+    .faq-item.open .faq-a { display: block; }
+
+    .faq-a__verdict-full {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+    .verdict-full-non { background: #FFEBEE; color: var(--red); }
+    .verdict-full-oui { background: #FFF3E0; color: #E65100; }
+    .verdict-full-depend { background: #E3F2FD; color: #1565C0; }
+
+    .faq-a p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .faq-a strong { color: var(--text); }
+
+    .faq-a__ref {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      color: var(--text-light);
+      padding: 8px 12px;
+      background: var(--highlight-bg);
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .faq-a__action {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent-mid);
+      margin-top: 8px;
+    }
+    .faq-a__action a {
+      color: var(--red);
+      text-decoration: none;
+    }
+
+    /* --- Letter template --- */
+    .letter-tpl {
+      background: var(--bg-warm);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin: 12px 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      position: relative;
+    }
+    .letter-tpl__copy {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 4px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .letter-tpl__copy:hover { border-color: var(--accent-mid); }
+
+    /* --- Score section --- */
+    .score-section {
+      background: var(--highlight-bg);
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin: 40px 0;
+      text-align: center;
+    }
+    .score-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .score-section p {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .score-number {
+      font-family: 'Inter', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--red);
+    }
+    .score-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* --- Transition --- */
+    .droits-transition {
+      background: var(--bg-warm);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin: 32px 0;
+    }
+    .droits-transition h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .droits-transition p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .droits-transition a {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--red);
+      text-decoration: none;
+    }
+
+    @media (max-width: 600px) {
+      .faq-a { padding-left: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="../index.html" class="site-header__logo">
+      <span class="npar-badge"><span class="npar-badge__npa">INFO</span><span class="npar-badge__r">UTILE</span></span>
+    </a>
+    <nav>
+      <ul class="site-header__nav">
+        <li><a href="../finance/">Finance</a></li>
+        <li><a href="../travail/">Travail</a></li>
+        <li><a href="../logement/" class="active">Logement</a></li>
+        <li><a href="../rejoindre/">Agir</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<div class="droits-wrap">
+
+  <div class="droits-hero">
+    <h1>Ton proprio peut-il faire ca ?</h1>
+    <p>20 situations concretes. Reponses juridiques claires. Modeles de lettres prets a copier.</p>
+  </div>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-cat="all">Tout</button>
+    <button class="filter-btn" data-cat="loyer">Loyer</button>
+    <button class="filter-btn" data-cat="depot">Depot de garantie</button>
+    <button class="filter-btn" data-cat="travaux">Travaux</button>
+    <button class="filter-btn" data-cat="expulsion">Expulsion</button>
+    <button class="filter-btn" data-cat="vie">Vie privee</button>
+  </div>
+
+  <div id="faqList"></div>
+
+  <div class="score-section" id="scoreSection" style="display:none">
+    <h3>Ton score de connaissance</h3>
+    <p>Tu as consulte <span id="scoreViewed">0</span> questions sur 16. Plus tu connais tes droits, moins ton proprio peut abuser.</p>
+    <a href="../quiz/" style="font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:var(--red);text-decoration:none;">Fais aussi le quiz exploitation au travail &rarr;</a>
+  </div>
+
+  <div class="droits-transition">
+    <h3>Pourquoi est-ce si complique de se loger ?</h3>
+    <p>3 millions de logements sont vides en France. Pendant ce temps, 4 millions de personnes sont mal logees. Ce n'est pas un paradoxe — c'est un systeme qui traite le logement comme un investissement, pas comme un droit.</p>
+    <p>20% des menages possedent 68% du parc locatif prive. La crise du logement n'est pas une fatalite : c'est le resultat de choix politiques qui favorisent les proprietaires et les speculateurs.</p>
+    <a href="../rejoindre/">Comprendre et agir &rarr;</a>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <p>Info Utile — Contenu independant. Donnees sourcees. <a href="../rejoindre/">Nous rejoindre</a>.</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  var FAQ = [
+    {
+      cat: 'loyer',
+      q: 'Augmenter ton loyer en cours de bail sans clause de revision ?',
+      verdict: 'non',
+      verdictText: 'NON — C\'est illegal',
+      answer: 'En l\'absence de clause de revision dans le bail, le proprietaire ne peut pas augmenter le loyer en cours de bail. Si une clause existe, l\'augmentation est plafonnee a l\'Indice de Reference des Loyers (IRL) publie par l\'INSEE.',
+      ref: 'Loi du 6 juillet 1989, article 17',
+      action: 'Si ton proprio augmente sans clause : ne paie pas le supplement et envoie un courrier recommande.',
+      letter: 'Objet : Contestation de l\'augmentation de loyer\n\nMadame, Monsieur,\n\nPar la presente, je conteste l\'augmentation de loyer que vous m\'avez notifiee le [DATE].\n\nEn effet, le bail signe le [DATE DU BAIL] ne contient aucune clause de revision du loyer. En application de l\'article 17 de la loi du 6 juillet 1989, le loyer ne peut donc etre revise en cours de bail.\n\nJe continuerai par consequent a vous verser le loyer initialement convenu, soit [MONTANT] euros.\n\nVeuillez agreer, Madame, Monsieur, mes salutations distinguees.\n\n[NOM, DATE, SIGNATURE]'
+    },
+    {
+      cat: 'depot',
+      q: 'Garder ton depot de garantie sans justificatif ?',
+      verdict: 'non',
+      verdictText: 'NON — Il a 1 mois pour restituer (2 si retenues)',
+      answer: 'Le proprio doit rendre le depot dans un delai d\'1 mois si l\'etat des lieux de sortie est conforme, ou 2 mois si des retenues sont justifiees. Passe ce delai, tu peux lui reclamer 10% de penalites par mois de retard. Les retenues doivent etre justifiees par des factures ou devis.',
+      ref: 'Loi du 6 juillet 1989, article 22',
+      action: 'Apres le delai, envoie une mise en demeure par recommande. Sans reponse sous 8 jours, saisis la commission departementale de conciliation (gratuit).',
+      letter: 'Objet : Mise en demeure de restitution du depot de garantie\n\nMadame, Monsieur,\n\nJ\'ai quitte le logement situe au [ADRESSE] le [DATE DE SORTIE]. L\'etat des lieux de sortie a ete realise le meme jour.\n\nA ce jour, soit plus de [1 ou 2] mois apres mon depart, je n\'ai toujours pas recu la restitution de mon depot de garantie d\'un montant de [MONTANT] euros.\n\nConformement a l\'article 22 de la loi du 6 juillet 1989, je vous mets en demeure de me restituer cette somme sous 8 jours, majoree des penalites de retard de 10% du loyer mensuel par mois de retard.\n\nA defaut, je saisirai la commission departementale de conciliation puis, si necessaire, le tribunal judiciaire.\n\n[NOM, DATE, SIGNATURE]'
+    },
+    {
+      cat: 'travaux',
+      q: 'Te facturer les reparations d\'usure normale ?',
+      verdict: 'non',
+      verdictText: 'NON — L\'usure normale est a sa charge',
+      answer: 'La vetuste (usure naturelle liee au temps et a l\'usage normal) est toujours a la charge du proprietaire. Un mur qui jaunit, un parquet qui se patine, des joints qui se deteriorent : c\'est normal, et c\'est pas a toi de payer. Seules les degradations anormales (trous, taches, casse) sont a ta charge.',
+      ref: 'Decret n 87-712 du 26 aout 1987',
+      action: 'En cas de litige, demande l\'application d\'une grille de vetuste. Si le bail n\'en prevoit pas, la jurisprudence retient environ 14% de decote par an.'
+    },
+    {
+      cat: 'expulsion',
+      q: 'T\'expulser pendant la treve hivernale (1er nov — 31 mars) ?',
+      verdict: 'non',
+      verdictText: 'NON — Interdit meme avec jugement d\'expulsion',
+      answer: 'Meme si un jugement d\'expulsion a ete rendu, aucune expulsion ne peut avoir lieu entre le 1er novembre et le 31 mars. Cette treve a ete etendue pendant le COVID et pourrait l\'etre a nouveau. Exception : les squatteurs du domicile principal (loi DALO).',
+      ref: 'Code des procedures civiles d\'execution, article L412-6',
+      action: 'Si un huissier se presente pendant la treve, rappelle-lui l\'article L412-6. Il n\'a pas le droit de proceder.'
+    },
+    {
+      cat: 'expulsion',
+      q: 'T\'expulser sans decision de justice ?',
+      verdict: 'non',
+      verdictText: 'NON — C\'est un delit penal',
+      answer: 'Un proprietaire ne peut JAMAIS t\'expulser lui-meme : changer les serrures, couper l\'eau ou l\'electricite, demenager tes affaires. C\'est un delit puni de 3 ans de prison et 30 000 euros d\'amende. Seul un huissier mandante par un juge peut proceder a une expulsion.',
+      ref: 'Code penal, article 226-4-2',
+      action: 'Si ton proprio agit seul : appelle la police, depose plainte, et contacte l\'ADIL de ton departement.'
+    },
+    {
+      cat: 'vie',
+      q: 'Entrer chez toi sans ton accord ?',
+      verdict: 'non',
+      verdictText: 'NON — Violation de domicile',
+      answer: 'Le logement que tu loues est ton domicile. Le proprietaire n\'a aucun droit d\'y entrer sans ton accord explicite, meme pour des "visites de controle". C\'est une violation de domicile, punissable d\'1 an de prison et 15 000 euros d\'amende.',
+      ref: 'Code penal, article 226-4',
+      action: 'Si ca arrive : change les serrures (tu en as le droit), depose plainte, et previens l\'ADIL.'
+    },
+    {
+      cat: 'vie',
+      q: 'T\'interdire d\'avoir un animal domestique ?',
+      verdict: 'non',
+      verdictText: 'NON — La clause est nulle',
+      answer: 'Toute clause du bail interdisant la detention d\'un animal domestique est reputee non ecrite (nulle). Tu peux avoir un chat, un chien, des poissons, etc. Exception : si l\'animal cause des nuisances averes (bruit, odeurs, degats) ou s\'il s\'agit d\'un animal dangereux de categorie 1 ou 2.',
+      ref: 'Loi du 9 juillet 1970, article 10',
+      action: 'Si ton proprio te menace : cite la loi de 1970. La clause est nulle de plein droit.'
+    },
+    {
+      cat: 'loyer',
+      q: 'Exiger le paiement du loyer en especes ?',
+      verdict: 'depend',
+      verdictText: 'CA DEPEND — Tu choisis ton mode de paiement',
+      answer: 'Le proprietaire ne peut pas t\'imposer un mode de paiement specifique (prelevement automatique, virement...). Tu as le droit de payer par cheque, virement ou especes (en dessous de 1 000 euros). En revanche, il peut refuser les especes au-dessus de 1 000 euros.',
+      ref: 'Code monetaire et financier, article D112-3',
+      action: 'Demande toujours un recu de paiement. C\'est ton droit et ta protection en cas de litige.'
+    },
+    {
+      cat: 'loyer',
+      q: 'Te demander plus d\'un mois de depot de garantie ?',
+      verdict: 'non',
+      verdictText: 'NON — 1 mois max pour un logement non meuble',
+      answer: 'Pour un logement vide, le depot de garantie ne peut pas exceder 1 mois de loyer hors charges. Pour un meuble, c\'est 2 mois. Si ton proprio demande plus, c\'est illegal.',
+      ref: 'Loi du 6 juillet 1989, article 22',
+      action: 'Ne paie que le montant legal. Tout versement supplementaire est recuperable.'
+    },
+    {
+      cat: 'travaux',
+      q: 'Refuser de faire des travaux de mise aux normes ?',
+      verdict: 'non',
+      verdictText: 'NON — Le logement doit etre decent',
+      answer: 'Le proprietaire a l\'obligation de fournir un logement decent : chauffage, eau chaude, electricite aux normes, pas d\'humidite excessive, surface minimum de 9m2. Si le logement n\'est pas aux normes, tu peux exiger les travaux et, en cas de refus, saisir le tribunal pour obtenir une reduction de loyer ou la resiliation du bail.',
+      ref: 'Decret n 2002-120 du 30 janvier 2002',
+      action: 'Envoie un courrier recommande demandant les travaux. Sans reponse sous 2 mois, saisis la mairie (service hygiene) ou l\'ARS.',
+      letter: 'Objet : Demande de travaux de mise en conformite\n\nMadame, Monsieur,\n\nJe vous informe que le logement situe au [ADRESSE] presente les desordres suivants : [DECRIRE : humidite, chauffage defaillant, installation electrique non conforme, etc.].\n\nConformement au decret n 2002-120 du 30 janvier 2002 relatif aux caracteristiques du logement decent, ces desordres relevent de votre responsabilite de bailleur.\n\nJe vous demande de proceder aux travaux necessaires dans un delai de 2 mois.\n\nA defaut, je me reserverai le droit de saisir la commission departementale de conciliation et, le cas echeant, le tribunal judiciaire.\n\n[NOM, DATE, SIGNATURE]'
+    },
+    {
+      cat: 'vie',
+      q: 'Te demander ton releve de compte bancaire ?',
+      verdict: 'non',
+      verdictText: 'NON — C\'est un document interdit',
+      answer: 'La loi liste precisement les documents que le proprio peut demander : pieces d\'identite, justificatifs de revenus (bulletins de paie, avis d\'imposition), justificatif de domicile. Les releves bancaires, photos d\'identite, carte vitale, extrait de casier judiciaire, attestation de bonne tenue de compte sont formellement interdits.',
+      ref: 'Loi du 6 juillet 1989, article 22-2 + decret du 5 novembre 2015',
+      action: 'Refuse poliment en citant l\'article 22-2. Si l\'agence insiste, signale-le a la DDPP de ton departement.'
+    },
+    {
+      cat: 'depot',
+      q: 'Retenir des sommes sur ton depot pour "nettoyage" ?',
+      verdict: 'depend',
+      verdictText: 'CA DEPEND — Seulement si c\'est justifie et chiffre',
+      answer: 'Le proprietaire peut retenir des sommes uniquement si le logement est rendu dans un etat significativement different de l\'etat des lieux d\'entree, hors usure normale. La retenue doit etre justifiee par des factures ou devis detailles. Un "forfait nettoyage" sans justificatif est abusif.',
+      ref: 'Loi du 6 juillet 1989, article 22',
+      action: 'Compare les etats des lieux d\'entree et de sortie. Conteste par recommande toute retenue non justifiee.'
+    },
+    {
+      cat: 'loyer',
+      q: 'Augmenter le loyer a chaque renouvellement de bail ?',
+      verdict: 'depend',
+      verdictText: 'CA DEPEND — Zone tendue = loyers encadres',
+      answer: 'En zone tendue (Paris, Lyon, Bordeaux, Montpellier, Lille...), les loyers sont encadres. Le proprio ne peut pas depasser le loyer de reference majore fixe par arrete prefectoral. Hors zone tendue, l\'augmentation est libre au renouvellement mais doit etre justifiee si elle depasse l\'IRL.',
+      ref: 'Loi ELAN 2018, dispositif d\'encadrement des loyers',
+      action: 'Verifie si tu es en zone tendue et le loyer de reference sur le site de ta prefecture ou de l\'ADIL.'
+    },
+    {
+      cat: 'expulsion',
+      q: 'Te donner conge (mettre fin au bail) pour n\'importe quel motif ?',
+      verdict: 'non',
+      verdictText: 'NON — 3 motifs legaux seulement',
+      answer: 'Le proprietaire ne peut donner conge que pour 3 raisons : (1) vente du logement, (2) reprise pour y habiter lui-meme ou un membre de sa famille, (3) motif legitime et serieux (impaye, troubles...). Le conge doit respecter un preavis de 6 mois avant l\'echeance du bail et etre motive.',
+      ref: 'Loi du 6 juillet 1989, article 15',
+      action: 'Un conge sans motif valable ou hors delai est nul. Ne quitte pas le logement et conteste par recommande.'
+    },
+    {
+      cat: 'travaux',
+      q: 'Te faire payer le remplacement de la chaudiere ?',
+      verdict: 'non',
+      verdictText: 'NON — Les grosses reparations sont a sa charge',
+      answer: 'L\'entretien courant de la chaudiere (revision annuelle) est a ta charge. Mais le remplacement en cas de panne definitive, la reparation des gros composants, et l\'installation sont a la charge du proprietaire. C\'est une "grosse reparation" au sens de l\'article 606 du Code civil.',
+      ref: 'Code civil, article 606 + decret n 87-712',
+      action: 'Previens par ecrit, demande la reparation/remplacement. Si refus : retiens le montant sur le loyer apres mise en demeure (avec precautions juridiques).'
+    },
+    {
+      cat: 'vie',
+      q: 'T\'imposer des visites pour relouer pendant ton preavis plus de 2h/jour ?',
+      verdict: 'non',
+      verdictText: 'NON — 2 heures par jour maximum',
+      answer: 'Pendant ton preavis, le proprio peut organiser des visites pour relouer, mais elles sont limitees a 2 heures par jour maximum (hors dimanches et jours feries, sauf accord de ta part). Les horaires doivent etre convenus avec toi. Tu peux refuser les creneaux qui ne te conviennent pas.',
+      ref: 'Usage constant confirme par jurisprudence + conventions locales',
+      action: 'Propose des creneaux raisonnables par ecrit. En cas d\'abus, rappelle la limite de 2h/jour.'
+    }
+  ];
+
+  var viewed = {};
+
+  function render(filter) {
+    var list = document.getElementById('faqList');
+    var html = '';
+    var filtered = filter === 'all' ? FAQ : FAQ.filter(function(f) { return f.cat === filter; });
+
+    filtered.forEach(function(item, idx) {
+      var vClass = item.verdict === 'non' ? 'verdict-non' : (item.verdict === 'oui' ? 'verdict-oui' : 'verdict-depend');
+      var vSymbol = item.verdict === 'non' ? '&#10007;' : (item.verdict === 'oui' ? '&#10003;' : '?');
+      var vfClass = item.verdict === 'non' ? 'verdict-full-non' : (item.verdict === 'oui' ? 'verdict-full-oui' : 'verdict-full-depend');
+
+      html += '<div class="faq-item" data-idx="' + idx + '">';
+      html += '<div class="faq-q" onclick="window._toggleFaq(this)">';
+      html += '<div class="faq-q__verdict ' + vClass + '">' + vSymbol + '</div>';
+      html += '<div class="faq-q__text">' + item.q + '</div>';
+      html += '<div class="faq-q__arrow">&#9660;</div>';
+      html += '</div>';
+      html += '<div class="faq-a">';
+      html += '<div class="faq-a__verdict-full ' + vfClass + '">' + item.verdictText + '</div>';
+      html += '<p>' + item.answer + '</p>';
+      html += '<div class="faq-a__ref">' + item.ref + '</div>';
+      if (item.letter) {
+        html += '<div class="letter-tpl"><button class="letter-tpl__copy" onclick="window._copyLetter(this)">Copier</button>' + item.letter.replace(/\n/g, '<br>') + '</div>';
+      }
+      html += '<div class="faq-a__action">' + item.action + '</div>';
+      html += '</div></div>';
+    });
+    list.innerHTML = html;
+  }
+
+  window._toggleFaq = function(el) {
+    var item = el.parentElement;
+    var wasOpen = item.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-item').forEach(function(f) { f.classList.remove('open'); });
+    if (!wasOpen) {
+      item.classList.add('open');
+      var idx = item.dataset.idx;
+      if (!viewed[idx]) {
+        viewed[idx] = true;
+        updateScore();
+      }
+    }
+  };
+
+  window._copyLetter = function(btn) {
+    var tpl = btn.parentElement;
+    var text = tpl.textContent.replace('Copier', '').trim();
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copie !';
+        setTimeout(function() { btn.textContent = 'Copier'; }, 2000);
+      });
+    }
+  };
+
+  function updateScore() {
+    var count = Object.keys(viewed).length;
+    if (count >= 3) {
+      document.getElementById('scoreSection').style.display = 'block';
+    }
+    document.getElementById('scoreViewed').textContent = count;
+  }
+
+  // Filter buttons
+  document.getElementById('filterBar').addEventListener('click', function(e) {
+    var btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    render(btn.dataset.cat);
+  });
+
+  render('all');
+})();
+</script>
+
+</body>
+</html>
